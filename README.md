@@ -1,69 +1,167 @@
-# Stage353: Verification Transparency Chain Layer
+# Stage354: Signature Key Rotation Ledger Layer
 
-Stage353 extends Stage352 by recording the Stage352 verification result into a transparency chain.
+Stage354 adds a transparent signature key lifecycle and rotation ledger on top of Stage353.
 
-## What Stage353 Adds
+This stage introduces:
 
-- Reads `docs/signatures/stage352_signature_manifest_verification.json`
-- Generates a SHA256 hash for the Stage352 verification result
-- Creates a transparency entry for the verification result
-- Chains entries with `previous_hash` and `entry_hash`
-- Carries forward the Stage352 decision
-- Fails closed if Stage352 is `reject`, `block`, or unknown
-- Does not claim external Rekor registration
-- Does not claim Bitcoin anchoring
+- Signature key lifecycle recording
+- Key rotation policy initialization
+- Stage178 Assumption / Threat Model / Guarantee binding
+- Ledger chaining with previous_hash and entry_hash
+- GPG metadata support
+- Sigstore OIDC metadata support
+- Ed25519 metadata support
+- PQC ML-DSA intent metadata support
+- Verification-safe public key status records
 
-## Public Evidence
+This stage does not publish:
 
-- `docs/transparency/stage353_verification_transparency_result.json`
-- `docs/transparency/stage353_verification_transparency_chain.json`
-- `docs/transparency/stage353_verification_transparency_summary.txt`
-
-## Decision Model
-
-- `accept`: Stage352 verification result is acceptable and chain link is valid
-- `warn`: Stage352 result was warning-level and logged as warning
-- `reject`: Stage352 failed, is missing, or the chain is invalid
-
-## Safety Boundary
-
-Stage353 does not publish private keys, raw secrets, fake signature claims, external Rekor claims, or Bitcoin anchor claims.
+- Private keys
+- Raw secret material
+- Seed values
+- Real PQC private key material
+- Fake active PQC key claims
+- Fake external transparency claims
 
 ---
 
-## Stage354: Signature Key Rotation Ledger Layer
+## Stage353 → Stage354
 
-Stage354 adds a signature key lifecycle and rotation ledger on top of Stage353.
+Stage353 focused on:
 
-It records safe public metadata for:
+- Verification transparency
+- Verification result chaining
+- Hash-linked audit history
 
-- GPG
-- Sigstore OIDC
-- Ed25519 witness
-- PQC ML-DSA intent
+Stage354 extends this by tracking:
 
-Stage354 also binds the Stage178 framework:
+- Key validity
+- Key rotation
+- Key revocation
+- Key lifecycle state
+- PQC migration readiness
 
-- Assumption
-- Threat Model
-- Guarantee
+---
 
-### Safety Boundary
+## Stage178 Binding
 
-Stage354 does not publish:
+Stage354 embeds the Stage178 framework:
 
-- private keys
-- raw secrets
-- seed material
-- real PQC private key material
-- fake active PQC key claims
-- fake external Rekor claims
+### Assumption
 
-### Current Decision
+- Signing keys are not assumed to remain secure forever.
+- Keys may be rotated, revoked, replaced, or superseded.
+- Verification must consider key validity at signing time.
 
-```text
+### Threat Model
+
+- Compromised keys
+- Revoked key misuse
+- Silent key replacement
+- Future PQC algorithm migration
+
+### Guarantee
+
+- Transparent key lifecycle records
+- Rotation history visibility
+- Verification-aware key status checking
+- No publication of private keys
+
+---
+
+## Key Lifecycle States
+
+Supported status examples:
+
+- active
+- rotated
+- revoked
+- expired
+- superseded
+- intent_only
+- not_configured
+
+---
+
+## Ledger Structure
+
+Generated files:
+
+docs/keys/stage354_key_rotation_ledger.json
+
+docs/keys/stage354_key_rotation_result.json
+
+docs/keys/stage354_key_rotation_summary.txt
+
+---
+
+## Verification Checks
+
+Stage354 verifies:
+
+- Stage353 result availability
+- Stage178 binding presence
+- Key record availability
+- No private key publication
+- No fake rotation claims
+- No fake active PQC key claims
+- Ledger chain integrity
+
+---
+
+## Current Decision
+
+Current initialization result:
+
 accept_policy_initialization
 
-This means the key rotation policy ledger was initialized safely,
-but no real production key rotation is being falsely claimed.
+Meaning:
+
+- Key lifecycle policy initialized
+- Ledger chain established
+- No active production key rotation claimed
+- No private key exposure detected
+
+---
+
+## Safety Boundary
+
+Stage354 is a metadata verification layer.
+
+It does not:
+
+- Manage production private keys
+- Generate cryptographic keys
+- Publish secrets
+- Perform real-world key rotation
+- Claim external transparency inclusion
+
+---
+
+## Relationship to QSP / VEP
+
+Stage354 strengthens long-term trust verification by adding:
+
+Evidence
+↓
+Verification
+↓
+Transparency
+↓
+Signature Context
+↓
+Key Lifecycle Tracking
+
+This allows future verification decisions to consider:
+
+- Was the signing key valid?
+- Was the key revoked?
+- Was the signature created before revocation?
+- Is the signing algorithm still trusted?
+
+---
+
+## License
+
+MIT License
 
